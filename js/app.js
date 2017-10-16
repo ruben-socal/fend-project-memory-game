@@ -67,7 +67,7 @@ function updateGameDisplay(moveCount) {
 	} else if(moveCount === 18) {
 		$(".stars li:nth-child(2)" ).children().attr("class", "fa fa-star-o");
 	} else if(moveCount === 20 ) {
-		$(".stars li:first-child()" ).children().attr("class", "fa fa-star-o")
+		$(".stars li:first-child()" ).children().attr("class", "fa fa-star-o");
 	}
 }
 
