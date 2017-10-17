@@ -156,6 +156,7 @@ function gameWin() {
 	$(".moves").text(moveCount);
 	$(".star-count").text(numStars);
 	$(".total-time").text(totalTime);
+	clearTimer();
 	playAgainEvent();
 }
 
@@ -217,7 +218,6 @@ function playAgainEvent() {
 		$(".moves").text(moveCount);
 		resetCards();
 		addCards(cardList);
-		clearTimer();
 		startTimer();
 	});
 }
