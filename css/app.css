@@ -39,7 +39,7 @@ h1 {
 
 .deck {
     width: 660px;
-    min-height: 680px;
+    height: 680px;
     background: linear-gradient(160deg, #02ccba 0%, #aa7ecd 100%); /* to remove background use background-size: 0 0; */
     padding: 32px;
     border-radius: 10px;
@@ -130,6 +130,8 @@ h1 {
     text-align: center;
 }
 
+
+
 .content {
     margin-top: 50%;
     margin-bottom: 50%;
@@ -150,4 +152,31 @@ h1 {
     margin: 4px 2px;
     cursor: pointer;
     border-radius: 12px;
+}
+
+@media only screen and (max-width: 768px) {
+     /*For mobile phones: */
+    .gameWinPanel {
+        width:100%;
+    }
+
+    .deck .card {
+        width: 62px;
+        height: 62px;
+    }
+    .score-panel {
+        width: 50%;
+    }
+
+    .deck {
+        width: 320px;
+        height: 340px;
+        padding: 20px;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .score-panel {
+        width: 70%;
+    }
 }
