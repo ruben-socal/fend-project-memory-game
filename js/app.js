@@ -16,7 +16,13 @@ var moveCount = 0;
 var matchCount = 0;
 
 /* timer keeps track of setInterval and totalTime keeps track of total time */
-var timer, totalTime;
+var timer, totalTime, hour, min, seconds;
+
+/* jquery selectors holders */
+var $card = $(".card"),
+	$moves = $(".moves"),
+	$header = $("header"),
+	$deck = $(".deck");
 
 /*
  * Display the cards on the page
@@ -44,8 +50,8 @@ function shuffle(array) {
 function addCards(array) {
 	$(".gameWinPanel").hide();
 	let cards = shuffle(array);
-	$( ".card" ).each(function( index ) {
-		$(this).children().attr("class", cards[index]);
+	$card.each(function( index ) {
+		$(this).children().attr("class", cards[index]);// replacing existing symbol instead of using removeClass() and addClass(cards[i])
 	});
 }
 
@@ -66,8 +72,6 @@ function updateGameDisplay(moveCount) {
 		$(".stars li:last-child").children().attr("class", "fa fa-star-o");
 	} else if(moveCount === 18) {
 		$(".stars li:nth-child(2)" ).children().attr("class", "fa fa-star-o");
-	} else if(moveCount === 20 ) {
-		$(".stars li:first-child()" ).children().attr("class", "fa fa-star-o");
 	}
 }
 
@@ -78,14 +82,14 @@ function resetStars() {
 
 /* resetCard function sets the card background display to dark gray  */
 function resetCards() {
-	$( ".card" ).each(function( index ) {
+	$card.each(function( index ) {
 		$(this).removeClass("match");
 	});
 }
 
 /* function startTimer starts the timer for the game */
 function startTimer() {
-	var hour =0, min=0, seconds=0;
+	hour=0, min=0, seconds=0;
 	timer = setInterval(function() {
  		seconds++;
  		if(min===60) {
@@ -100,8 +104,9 @@ function startTimer() {
 	}, 1000);
 }
 
-function clearTimer() {
-	clearInterval(timer);
+/* function resetTime resets the time for the time function startTimer*/
+function resetTime() {
+	hour=0,min=0,seconds=0;
 }
 
 /* notSameCard function checks if the same card was clicked twice, returns true or false
@@ -117,46 +122,43 @@ function doCardsMatch(cardsToMatch) {
 	return cardOne.hasClass(cardTwo);
 }
 
-/* cardsMatched function display cards that match */
-function cardsMatched(cardsToMatch) {
+/* processCards function displays card color background for cards that has been matched (orange red) or not matched (dark gray) */
+function processCards(cardsToMatch, isMatched ) {
 	let cardOne = cardsToMatch[0],
 	    cardTwo = cardsToMatch[1];
-	cardOne.addClass("match");
-	cardOne.removeClass("show open");
-	// cardOne.off( "click");
-	cardTwo.addClass("match");
-	cardTwo.removeClass("show open");
-	// cardTwo.off( "click"); // $this.on("click", function(){}); to turn event back on
-	cardsToMatch.pop();
-	cardsToMatch.pop();
-}
-
-/* cardsNotMatched function temporarily displays cards not matched with background color orange red with symbol, then displays dark gray background  */
-function cardsNotMatched(cardsToMatch) {
-	let cardOne = cardsToMatch[0],
-	    cardTwo = cardsToMatch[1];
-	cardOne.removeClass("show open");
-	cardTwo.addClass("nomatch");
-	cardOne.addClass("nomatch");
-	setTimeout(function(){
-		cardTwo.removeClass("nomatch");
-	 	cardOne.removeClass("nomatch");
-	}, 1000);
-	cardsToMatch.pop();
-	cardsToMatch.pop();
+		moveCount++;
+	if(isMatched) {
+		matchCount += 2;
+		cardOne.addClass("match");
+		cardOne.removeClass("show open");
+		cardTwo.addClass("match");
+		cardTwo.removeClass("show open");
+		cardsToMatch.length = 0;
+		if(matchCount === 16) {
+			gameWin();
+		}
+	} else {
+		cardOne.removeClass("show open");
+		cardTwo.addClass("nomatch");
+		cardOne.addClass("nomatch");
+		setTimeout(function(){
+			cardTwo.removeClass("nomatch");
+		 	cardOne.removeClass("nomatch");
+		}, 1000);
+		cardsToMatch.length = 0;
+	}
 }
 
 /* gameWin function displays panel congratulating the player for winning with number of moves, stars, total time and a play again button  */
 function gameWin() {
 	let numStars = $(".fa.fa-star").length;
-	$("header").hide();
+	$header.hide();
 	$(".score-panel").hide();
-	$(".deck").hide();
+	$deck.hide();
 	$(".gameWinPanel").show();
-	$(".moves").text(moveCount);
+	$moves.text(moveCount);
 	$(".star-count").text(numStars);
 	$(".total-time").text(totalTime);
-	clearTimer();
 	playAgainEvent();
 }
 
@@ -173,29 +175,17 @@ function gameWin() {
 // card event listener
 function addCardEvents() {
 	// Attach a directly bound event handler
-	$( "ul li" ).on( "click", function( event ) {
+	$card.on( "click", function( event ) {
 	    event.preventDefault();
 	    let card = $(this);
-	    /* if card does not have class match continue, else remove card from carsToMatch,  */
+	    /* if card does not have class match continue, else remove card from cardsToMatch,  */
 	    if( !card.hasClass("match") ){
 	    	openCards(card);
 		    if( cardsToMatch.length === 1) {
 		    	displayCardSymbol(card);
 		    } else if ( notSameCard(cardsToMatch) ) {
-		    	/* if cards match 1) change both card background colors to turquoise 2) disable click event */
-		    	if( doCardsMatch(cardsToMatch) ) {
-		    		matchCount += 2;
-				    moveCount ++;
-		    		cardsMatched(cardsToMatch);
-		    		if(matchCount === 16) {
-		    			gameWin();
-		    		}
-		    	} else {
-			    	/* if cards do not match 1) change both card background colors to red/orange for 1 second than
-			    	   back to solid dark gray 2) click events should still work */
-			    	moveCount ++;
-			    	cardsNotMatched(cardsToMatch);
-		    	}
+		    	var isMatched = doCardsMatch(cardsToMatch);
+				processCards(cardsToMatch, isMatched );
 		    	updateGameDisplay(moveCount);
 		    } else {
 		    	/* remove card from cardsToMatch if same card is clicked twice */
@@ -209,16 +199,16 @@ function addCardEvents() {
 function playAgainEvent() {
 	$( ".play-again" ).on( "click", function( event ) {
 		$(".gameWinPanel").hide();
-		$("header").show();
+		$header.show();
 		$(".score-panel").show();
-		$(".deck").show();
+		$deck.show();
 		moveCount = 0;
 		matchCount = 0;
 		resetStars();
-		$(".moves").text(moveCount);
+		$moves.text(moveCount);
 		resetCards();
 		addCards(cardList);
-		startTimer();
+		resetTime();
 	});
 }
 
@@ -229,14 +219,13 @@ function restartGameEvent() {
 		matchCount = 0;
 		cardsToMatch.length = 0;
 		resetStars();
-		$(".moves").text(moveCount);
-		$(".card").removeClass("show");
-		$(".card").removeClass("open");
-		$(".card").removeClass("match");
+		$moves.text(moveCount);
+		$card.removeClass("show");
+		$card.removeClass("open");
+		$card.removeClass("match");
 		resetCards();
 		addCards(cardList);
-		clearTimer();
-		startTimer();
+		resetTime();
 	});
 }
 
@@ -244,7 +233,7 @@ function restartGameEvent() {
 $(document).ready(function(){
 	$(restartGameEvent);
 	$(addCards(cardList));
-	$(startTimer);
 	$(addCardEvents);
+	$(startTimer);
 
 });
